@@ -1,0 +1,19 @@
+YED-SYSCLIP(7) "YED Plugin Manual"
+
+# NAME
+
+sysclip - Description
+
+# CONFIGURATION
+Variables
+	- sys-clip - Specify your system clipboard.
+# COMMANDS
+y2s - Stands for yank2system, yanks to your specified system clipboard defaults to xsel.
+# BUFFERS
+None.
+# NOTES
+Clipboards that fork will hang, like wl-clipboard, so do not use them, or at least turn off the forking if possible.
+# VERSION
+1000.00
+# KEYWORDS
+clipboard, yank, copy, system, kill-ring, kill ring
