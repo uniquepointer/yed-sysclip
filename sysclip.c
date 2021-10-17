@@ -20,8 +20,6 @@ yed_plugin_boot(yed_plugin* self)
     return 0;
 }
 
-pthread_mutex_t scmtx = PTHREAD_MUTEX_INITIALIZER;
-int             scmtx_state;
 void
 thr_wrap(int n_args, char** args)
 {
@@ -40,28 +38,27 @@ thr_wrap(int n_args, char** args)
         yed_cerr("active frame has no buffer");
         return;
     }
-    scmtx_state = pthread_mutex_trylock(&scmtx);
-    if (scmtx_state == 0)
+
+    tret = pthread_create(&sctr, NULL, sysclip, NULL);
+    if (tret != 0)
     {
-        tret = pthread_create(&sctr, NULL, sysclip, NULL);
-        if (tret != 0)
-        {
-            yed_cerr("Failed to create thread");
-            return;
-        }
-    }
-    else
-    {
-        yed_cerr("Sysclip currently working");
+        yed_cerr("Failed to create thread");
+        return;
     }
 }
+
+pthread_mutex_t scmtx = PTHREAD_MUTEX_INITIALIZER;
 void*
 sysclip()
 {
     yed_frame*  frame;
     yed_buffer* buff;
+
+    int  scmtx_state;
+
     int         output_len, status;
     char        cmd_buff[4096];
+
     if (!ys->active_frame)
     {
         yed_cerr("no active frame");
@@ -79,6 +76,14 @@ sysclip()
         yed_cerr("nothing is selected");
         pthread_exit(NULL);
     }
+
+    scmtx_state = pthread_mutex_trylock(&scmtx);
+    if (scmtx_state != 0)
+    {
+        yed_cerr("Sysclip currently working.");
+        pthread_exit(NULL);
+    }
+
     char* str2paste = get_sel_text(frame->buffer);
     char* clip_pref   = yed_get_var("sys-clip");
     FILE* fp        = fopen("/tmp/.yedsysclipmeow", "w+");
