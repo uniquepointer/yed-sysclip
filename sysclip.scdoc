@@ -12,7 +12,12 @@ y2s - Stands for yank2system, yanks to your specified system clipboard defaults 
 # BUFFERS
 None.
 # NOTES
-Clipboards that fork will hang, like wl-clipboard, so do not use them, or at least turn off the forking if possible.
+Some clipboards need some extra flags to work with sys-clip for example:
+- With "xclip" set as sys-clip, options flags "-i" and "-f" will be added so it does not hang, just select your text and run "y2s".
+But others require no settings like:
+- "xsel"
+- "wl-copy"
+  - But only works with latest master build since wl-clipboard has not been updated in some repos since 2019.
 # VERSION
 1000.00
 # KEYWORDS

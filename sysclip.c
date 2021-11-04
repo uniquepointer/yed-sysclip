@@ -94,8 +94,25 @@ sysclip()
         i++;
     }
     fclose(fp);
-    snprintf(cmd_buff, sizeof(cmd_buff), "cat /tmp/.yedsysclipmeow | %s",
-             clip_pref);
+    if (strcmp(clip_pref, "xclip") == 0)
+    {
+        snprintf(cmd_buff, sizeof(cmd_buff), "cat /tmp/.yedsysclipmeow | %s -i -f",
+                 clip_pref);
+        yed_cerr(cmd_buff);
+    }
+    else if (strcmp(clip_pref, "wl-copy") == 0 ||
+             strcmp(clip_pref, "wl-clipboard") == 0)
+    {
+        snprintf(cmd_buff, sizeof(cmd_buff),
+                 "wl-copy < /tmp/.yedsysclipmeow"
+                );
+    }
+    else
+    {
+
+        snprintf(cmd_buff, sizeof(cmd_buff), "cat /tmp/.yedsysclipmeow | %s",
+                 clip_pref);
+    }
     yed_run_subproc(cmd_buff, &output_len, &status);
     yed_cprint("Yanked to system clipboard");
     remove("/tmp/.yedsysclipmeow");
