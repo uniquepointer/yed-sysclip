@@ -98,7 +98,6 @@ sysclip()
     {
         snprintf(cmd_buff, sizeof(cmd_buff), "cat /tmp/.yedsysclipmeow | %s -i -f",
                  clip_pref);
-        yed_cerr(cmd_buff);
     }
     else if (strcmp(clip_pref, "wl-copy") == 0 ||
              strcmp(clip_pref, "wl-clipboard") == 0)
