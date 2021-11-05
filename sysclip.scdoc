@@ -18,6 +18,7 @@ But others require no settings like:
 - "xsel"
 - "wl-copy"
   - But only works with latest master build since wl-clipboard has not been updated in some repos since 2019.
+- Any other you should put the whole clipboard command to pipe to.
 # VERSION
 1000.00
 # KEYWORDS
