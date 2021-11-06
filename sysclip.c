@@ -56,7 +56,6 @@ sysclip()
 
     int  scmtx_state;
 
-    int         output_len, status;
     char        cmd_buff[4096];
 
     if (!ys->active_frame)
@@ -86,33 +85,21 @@ sysclip()
 
     char* str2paste = get_sel_text(frame->buffer);
     char* clip_pref   = yed_get_var("sys-clip");
-    FILE* fp        = fopen("/tmp/.yedsysclipmeow", "w+");
-    int   i         = 0;
-    while (str2paste[i] != '\0')
-    {
-        fputc(str2paste[i], fp);
-        i++;
-    }
-    fclose(fp);
-    if (strcmp(clip_pref, "xclip") == 0)
-    {
-        snprintf(cmd_buff, sizeof(cmd_buff), "cat /tmp/.yedsysclipmeow | %s -i -f",
-                 clip_pref);
-    }
-    else if (strcmp(clip_pref, "wl-copy") == 0 ||
-             strcmp(clip_pref, "wl-clipboard") == 0)
-    {
-        snprintf(cmd_buff, sizeof(cmd_buff),
-                 "wl-copy < /tmp/.yedsysclipmeow"
-                );
-    }
-    else
-    {
+    FILE* sc_pipe;
 
-        snprintf(cmd_buff, sizeof(cmd_buff), "cat /tmp/.yedsysclipmeow | %s",
-                 clip_pref);
+    snprintf(cmd_buff, sizeof(cmd_buff), "%s",
+             clip_pref);
+
+    if ((sc_pipe = popen(cmd_buff, "w")) == NULL)
+    {
+        perror("popen");
+        yed_cerr("Could not open pipe");
+        pthread_exit(NULL);
     }
-    yed_run_subproc(cmd_buff, &output_len, &status);
+
+    fprintf(sc_pipe, "%s", str2paste);
+    pclose(sc_pipe);
+
     yed_cprint("Yanked to system clipboard");
     remove("/tmp/.yedsysclipmeow");
     free(str2paste);
