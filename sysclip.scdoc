@@ -7,18 +7,25 @@ sysclip - Description
 # CONFIGURATION
 Variables
 	- sys-clip - Specify your system clipboard.
+# EXAMPLE
+xsel almost never needs configuration :}
+```
+set sys-clip 'xsel'
+```
+This sets clipboard to wl-copy but you can only paste once.
+```
+set sys-clip 'wl-copy -o'
+```
+Here you specify the selection access to clipboard only.
+```
+set sys-clip 'xclip -selection c'
+```
 # COMMANDS
 y2s - Stands for yank2system, yanks to your specified system clipboard defaults to xsel.
 # BUFFERS
 None.
 # NOTES
-Some clipboards need some extra flags to work with sys-clip for example:
-- With "xclip" set as sys-clip, options flags "-i" and "-f" will be added so it does not hang, just select your text and run "y2s".
-But others require no settings like:
-- "xsel"
-- "wl-copy"
-  - But only works with latest master build since wl-clipboard has not been updated in some repos since 2019.
-- Any other you should put the whole clipboard command to pipe to.
+None.
 # VERSION
 1000.00
 # KEYWORDS
