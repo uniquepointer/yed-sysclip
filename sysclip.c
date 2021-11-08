@@ -7,6 +7,12 @@ get_sel_text(yed_buffer* buffer);
 void
 thr_wrap(int n_args, char** args);
 
+struct Params
+{
+    char* str2paste;
+    char* clip_pref;
+};
+
 int
 yed_plugin_boot(yed_plugin* self)
 {
@@ -27,11 +33,14 @@ thr_wrap(int n_args, char** args)
     yed_buffer* buffer;
     pthread_t   sctr;
     int         tret;
+    struct Params* p;
+
     if (!ys->active_frame)
     {
         yed_cerr("no active frame");
         return;
     }
+
     frame = ys->active_frame;
     if (!frame->buffer)
     {
@@ -39,7 +48,18 @@ thr_wrap(int n_args, char** args)
         return;
     }
 
-    tret = pthread_create(&sctr, NULL, sysclip, NULL);
+    buffer = frame->buffer;
+    if (!buffer->has_selection)
+    {
+        yed_cerr("nothing is selected");
+        return;
+    }
+
+    p = (struct Params*)malloc(sizeof(struct Params));
+    p->str2paste = get_sel_text(frame->buffer);
+    p->clip_pref   = yed_get_var("sys-clip");
+
+    tret = pthread_create(&sctr, NULL, sysclip, p);
     if (tret != 0)
     {
         yed_cerr("Failed to create thread");
@@ -47,64 +67,27 @@ thr_wrap(int n_args, char** args)
     }
 }
 
-pthread_mutex_t scmtx = PTHREAD_MUTEX_INITIALIZER;
 void*
-sysclip()
+sysclip(struct Params* p)
 {
-    yed_frame*  frame;
-    yed_buffer* buff;
-
-    int  scmtx_state;
-
     char        cmd_buff[4096];
-
-    if (!ys->active_frame)
-    {
-        yed_cerr("no active frame");
-        pthread_exit(NULL);
-    }
-    frame = ys->active_frame;
-    if (!frame->buffer)
-    {
-        yed_cerr("active frame has no buffer");
-        pthread_exit(NULL);
-    }
-    buff = frame->buffer;
-    if (!buff->has_selection)
-    {
-        yed_cerr("nothing is selected");
-        pthread_exit(NULL);
-    }
-
-    scmtx_state = pthread_mutex_trylock(&scmtx);
-    if (scmtx_state != 0)
-    {
-        yed_cerr("Sysclip currently working.");
-        pthread_exit(NULL);
-    }
-
-    char* str2paste = get_sel_text(frame->buffer);
-    char* clip_pref   = yed_get_var("sys-clip");
     FILE* sc_pipe;
 
     snprintf(cmd_buff, sizeof(cmd_buff), "%s",
-             clip_pref);
+             p->clip_pref);
 
     if ((sc_pipe = popen(cmd_buff, "w")) == NULL)
     {
-        perror("popen");
-        yed_cerr("Could not open pipe");
         pthread_exit(NULL);
     }
 
-    fprintf(sc_pipe, "%s", str2paste);
+    fprintf(sc_pipe, "%s", p->str2paste);
     pclose(sc_pipe);
 
-    yed_cprint("Yanked to system clipboard");
-    remove("/tmp/.yedsysclipmeow");
-    free(str2paste);
-    pthread_mutex_unlock(&scmtx);
-    pthread_exit(NULL);
+/*     yed_cprint("Yanked to system clipboard"); */
+    free(p->str2paste);
+    free(p);
+    return(NULL);
 }
 
 /* ty kammer */
