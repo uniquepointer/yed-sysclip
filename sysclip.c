@@ -57,7 +57,7 @@ thr_wrap(int n_args, char** args)
 
     p = (struct Params*)malloc(sizeof(struct Params));
     p->str2paste = get_sel_text(frame->buffer);
-    p->clip_pref   = yed_get_var("sys-clip");
+    p->clip_pref = yed_get_var("sys-clip");
 
     tret = pthread_create(&sctr, NULL, sysclip, p);
     if (tret != 0)
@@ -84,10 +84,10 @@ sysclip(struct Params* p)
     fprintf(sc_pipe, "%s", p->str2paste);
     pclose(sc_pipe);
 
-/*     yed_cprint("Yanked to system clipboard"); */
+    /*     yed_cprint("Yanked to system clipboard"); */
     free(p->str2paste);
     free(p);
-    return(NULL);
+    return (NULL);
 }
 
 /* ty kammer */
